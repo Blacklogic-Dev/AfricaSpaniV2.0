@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AfricaSpani Dashboard | BlackLogic Technologies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-[#020617] min-h-screen text-blue-100">
+
+  <!-- HAMBURGER MENU -->
+  <div class="lg:hidden fixed top-4 left-4 z-50">
+    <button id="hamburger" class="text-white bg-blue-800 p-3 rounded-lg shadow-md focus:outline-none">
+      <i class="fas fa-bars text-xl"></i>
+    </button>
+  </div>
+
+  <!-- SIDE DRAWER -->
+  <aside id="sideDrawer"
+         class="fixed top-0 left-0 w-64 h-full bg-[#010a1f] text-blue-100
+                transform -translate-x-full lg:translate-x-0
+                transition-transform duration-300 z-40 p-6 shadow-lg">
+
+    <h1 class="text-2xl font-bold mb-8">AfricaSpani System</h1>
+
+    <ul class="space-y-5 text-sm font-medium">
+      <li>
+        <a href="candidate.html" class="flex items-center gap-3 hover:text-blue-400">
+          <i class="fas fa-users"></i> Candidates Database
+        </a>
+      </li>
+      <li>
+        <a href="projects.html" class="flex items-center gap-3 hover:text-blue-400">
+          <i class="fas fa-briefcase"></i> Registration Database
+        </a>
+      </li>
+      <li>
+        <a href="attendance.html" class="flex items-center gap-3 hover:text-blue-400">
+          <i class="fas fa-calendar-check"></i> Digital Attendance
+        </a>
+      </li>
+      <li>
+        <a href="verify.html" class="flex items-center gap-3 hover:text-blue-400">
+          <i class="fas fa-toggle-on"></i> Verification page
+        </a>
+      </li>
+      <li>
+     
+        <a href="report.html" class="flex items-center gap-3 hover:text-blue-400">
+          <i class="fas fa-calendar-week"></i> Weekly / Monthly Attendance
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- OVERLAY -->
+  <div id="overlay" class="hidden fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 flex flex-col lg:ml-64 pt-16 px-4">
+
+    <!-- BANNER -->
+    <div class="w-full mb-8">
+      <img src="banner.jpg" alt="Banner" class="w-full rounded-xl shadow-lg object-cover h-52 lg:h-64">
+    </div>
+
+<!-- SYSTEM MODULES GRID -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+
+  <!-- CANDIDATES DATABASE -->
+  <a href="candidates.html"
+     class="bg-[#010a1f] hover:bg-blue-800 transition rounded-xl shadow-lg p-6 text-center">
+    <i class="fas fa-users text-5xl text-blue-400 mb-4"></i>
+    <h3 class="text-xl font-semibold mb-2 text-white">Candidates Database</h3>
+    <p class="text-sm text-blue-300">
+      Secure storage and management of all registered candidates.
+    </p>
+  </a>
+
+  <!-- REGISTRATION DATABASE -->
+  <a href="registration.html"
+     class="bg-[#010a1f] hover:bg-indigo-700 transition rounded-xl shadow-lg p-6 text-center">
+    <i class="fas fa-database text-5xl text-indigo-400 mb-4"></i>
+    <h3 class="text-xl font-semibold mb-2 text-white">Registration Database</h3>
+    <p class="text-sm text-blue-300">
+      Centralized registration records with controlled access.
+    </p>
+  </a>
+
+  <!-- FACE & BIOMETRIC ATTENDANCE -->
+  <a href="attendance.html"
+     class="bg-[#010a1f] hover:bg-green-700 transition rounded-xl shadow-lg p-6 text-center">
+    <i class="fas fa-fingerprint text-5xl text-green-400 mb-4"></i>
+    <h3 class="text-xl font-semibold mb-2 text-white">
+      Face & Biometric Attendance
+    </h3>
+    <p class="text-sm text-blue-300">
+      Digital attendance using facial and fingerprint verification.
+    </p>
+  </a>
+
+</div>
+    </div>
+
+  </main>
+
+<script>
+  // HAMBURGER MENU
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('sideDrawer');
+  const overlay = document.getElementById('overlay');
+
+  hamburger.addEventListener('click', () => {
+    drawer.classList.toggle('-translate-x-full');
+    overlay.classList.toggle('hidden');
+  });
+
+  overlay.addEventListener('click', () => {
+    drawer.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  });
+</script>
+
+</body>
+</html>

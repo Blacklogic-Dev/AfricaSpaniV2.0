@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 Attendance Database</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body { background:#e0f2fe; }
+  input, select { color:black; background:white; }
+  .locked { opacity:0.4; pointer-events:none; }
+</style>
+</head>
+
+<body class="min-h-screen p-6">
+
+<!-- HEADER -->
+<div class="mb-6 flex items-center gap-3">
+  <i class="fa-solid fa-database text-3xl text-sky-600"></i>
+  <div>
+    <h1 class="text-3xl font-bold text-gray-800">Attendance Database</h1>
+    <p id="dateTime" class="text-gray-700"></p>
+  </div>
+</div>
+
+<!-- COMPANY DETAILS -->
+<div id="companySection" class="bg-[#010a1f] p-6 rounded-lg shadow-lg max-w-5xl mx-auto text-white mb-6">
+  <h2 class="text-xl font-bold mb-4">Company Details</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <input id="companyName" placeholder="Company Name" class="p-2 rounded"/>
+
+    <input id="capacity" type="number" min="1" placeholder="Capacity to Capture" class="p-2 rounded"/>
+
+    <select id="authority" class="p-2 rounded">
+      <option value="">Authority</option>
+      <option>Data Security Engineer</option>
+      <option>Data Admin Technologist</option>
+    </select>
+
+    <button id="startCapture"
+      class="bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold">
+      Start Capture
+    </button>
+  </div>
+</div>
+
+<!-- EMPLOYEE DETAILS -->
+<div id="employeeSection"
+ class="bg-[#010a1f] p-6 rounded-lg shadow-lg max-w-5xl mx-auto text-white mb-6 locked">
+
+  <h2 class="text-xl font-bold mb-4">Employee Details</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <input id="initials" placeholder="Initials & Surname" class="p-2 rounded"/>
+    <input id="jobTitle" placeholder="Job Title" class="p-2 rounded"/>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+    <input id="faceID" placeholder="Face ID" disabled class="p-2 rounded"/>
+    <input id="biometricID" placeholder="Biometric ID" disabled class="p-2 rounded"/>
+  </div>
+
+  <div class="mt-4 flex gap-4 items-center">
+    <button id="verifyBtn"
+      class="bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded font-semibold flex items-center gap-2">
+      <i class="fa-solid fa-fingerprint"></i>
+      Start Verification
+    </button>
+
+    <span id="countdown" class="font-bold text-yellow-300"></span>
+  </div>
+
+  <button id="saveData"
+    class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold">
+    Save Data
+  </button>
+</div>
+
+<!-- TABLE -->
+<div class="bg-white p-6 rounded-lg shadow-lg max-w-6xl mx-auto">
+  <h2 class="font-semibold mb-4 text-gray-800">Captured Attendance</h2>
+
+  <table class="w-full border text-sm">
+    <thead class="bg-sky-500 text-white">
+      <tr>
+        <th class="p-2">Initials</th>
+        <th class="p-2">Job</th>
+        <th class="p-2">Face ID</th>
+        <th class="p-2">Biometric ID</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <button id="printReceipt"
+    class="mt-6 bg-gray-800 hover:bg-black text-white px-6 py-2 rounded font-semibold w-full hidden">
+    Print Receipt
+  </button>
+</div>
+
+<script>
+/* CLOCK */
+setInterval(()=>{
+  dateTime.innerText = new Date().toLocaleString();
+},1000);
+
+/* STATE */
+let records = [];
+let capacityLimit = 0;
+let bioCounter = 1;
+let faceCounter = 1001;
+
+/* START CAPTURE */
+startCapture.onclick = () => {
+  if(!companyName.value || !capacity.value || !authority.value){
+    alert("Complete company details first");
+    return;
+  }
+  capacityLimit = Number(capacity.value);
+  companySection.classList.add("locked");
+  employeeSection.classList.remove("locked");
+};
+
+/* VERIFICATION */
+verifyBtn.onclick = () => {
+  verifyBtn.disabled = true;
+  let timeLeft = 30;
+  countdown.innerText = `Verifying... ${timeLeft}s`;
+
+  const timer = setInterval(()=>{
+    timeLeft--;
+    countdown.innerText = `Verifying... ${timeLeft}s`;
+
+    if(timeLeft === 0){
+      clearInterval(timer);
+      const month = new Date().getMonth()+1;
+      biometricID.value = `26/${month}/${String(bioCounter).padStart(3,"0")}`;
+      faceID.value = `26/${month}/${faceCounter}`;
+      bioCounter++;
+      faceCounter++;
+      countdown.innerText = "Verification Approved ✔️";
+    }
+  },1000);
+};
+
+/* SAVE DATA */
+saveData.onclick = () => {
+  if(records.length >= capacityLimit){
+    alert("Capacity reached");
+    return;
+  }
+
+  if(!initials.value || !jobTitle.value || !faceID.value){
+    alert("Complete verification first");
+    return;
+  }
+
+  records.push({
+    initials: initials.value,
+    job: jobTitle.value,
+    face: faceID.value,
+    bio: biometricID.value
+  });
+
+  renderTable();
+
+  initials.value = "";
+  jobTitle.value = "";
+  faceID.value = "";
+  biometricID.value = "";
+  countdown.innerText = "";
+  verifyBtn.disabled = false;
+
+  if(records.length >= 5){
+    printReceipt.classList.remove("hidden");
+  }
+};
+
+/* TABLE */
+function renderTable(){
+  tableBody.innerHTML = "";
+  records.forEach(r=>{
+    tableBody.innerHTML += `
+      <tr class="border-b text-center">
+        <td class="p-2">${r.initials}</td>
+        <td class="p-2">${r.job}</td>
+        <td class="p-2">${r.face}</td>
+        <td class="p-2">${r.bio}</td>
+      </tr>`;
+  });
+}
+
+/* PRINT */
+printReceipt.onclick = () => window.print();
+</script>
+
+</body>
+</html>

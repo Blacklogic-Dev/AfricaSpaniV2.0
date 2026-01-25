@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AfricaSpani | BlackLogic Technologies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-sky-900 via-slate-900 to-black flex items-center justify-center">
+
+  <!-- LOGIN CARD -->
+  <div class="w-full max-w-sm bg-white/95 backdrop-blur rounded-2xl shadow-2xl px-6 py-8">
+
+    <div class="flex flex-col items-center mb-6">
+      <img src="spani.jpg" class="w-20 h-20 rounded-xl shadow mb-3" />
+      <h1 class="text-lg font-bold text-gray-800">AfricaSpani Access</h1>
+      <p class="text-xs text-gray-500">BlackLogic Technologies</p>
+    </div>
+
+    <!-- UNIQUE ID -->
+    <div class="mb-4">
+      <label class="text-xs font-semibold text-gray-600">Unique ID</label>
+      <input
+        id="uniqueId"
+        type="password"
+        placeholder=" "
+        class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sky-500 outline-none text-sm"
+      />
+    </div>
+
+    <!-- ACCESS CODE -->
+    <div class="mb-4">
+      <label class="text-xs font-semibold text-gray-600">Access Code</label>
+      <input
+        id="accessCode"
+        type="password"
+        placeholder=""
+        class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sky-500 outline-none text-sm"
+      />
+    </div>
+
+    <!-- ERROR -->
+    <p id="error"
+       class="hidden text-red-500 text-xs mb-3 text-center animate-pulse">
+       Invalid credentials
+    </p>
+
+    <!-- LOGIN BUTTON -->
+    <button
+      onclick="validateAccess()"
+      class="w-full bg-sky-600 hover:bg-sky-700 active:scale-95 transition text-white py-2 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2"
+    >
+      <i class="fas fa-fingerprint"></i>
+      Verify Access
+    </button>
+
+    <p class="text-[10px] text-gray-400 mt-4 text-center">
+      Secure Biometric Gateway Enabled
+    </p>
+  </div>
+
+<script>
+  function validateAccess() {
+    const id = document.getElementById("uniqueId").value.trim();
+    const code = document.getElementById("accessCode").value.trim();
+    const error = document.getElementById("error");
+
+    const accessMap = {
+      "KX0011": "Blacklogic",
+      "KX1011": "Quinn"
+    };
+
+    if (accessMap[id] && accessMap[id].toLowerCase() === code.toLowerCase()) {
+      error.classList.add("hidden");
+
+      // Store session (optional, future backend use)
+      sessionStorage.setItem("africaspani_user", id);
+
+      // Redirect to biometric
+      window.location.href = "biometric.html";
+    } else {
+      error.classList.remove("hidden");
+    }
+  }
+</script>
+
+</body>
+</html>

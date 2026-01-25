@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Registration | AfricaSpani</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="bg-sky-100 min-h-screen p-6">
+
+  <!-- Back Button -->
+  <a href="dashboard.html" class="inline-flex items-center mb-6 text-white bg-sky-600 hover:bg-sky-700 px-3 py-2 rounded transition">
+    <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+  </a>
+
+  <h1 class="text-3xl font-bold text-sky-900 mb-6">Company Registration</h1>
+
+  <!-- Registration Form -->
+  <div class="bg-sky-900 p-6 rounded-lg shadow-lg mb-6">
+    <h2 class="font-semibold mb-4 text-white text-xl">Add Company</h2>
+    <form id="companyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Company Number -->
+      <div class="flex flex-col">
+        <label for="companyNumber" class="text-white mb-1 font-medium">Company Number (CIPC)</label>
+        <input type="text" id="companyNumber" placeholder="Enter CIPC Number" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+               required>
+      </div>
+
+      <!-- Registered Name -->
+      <div class="flex flex-col">
+        <label for="registeredName" class="text-white mb-1 font-medium">Company Registered Name</label>
+        <input type="text" id="registeredName" placeholder="Enter Company Name" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+               required>
+      </div>
+
+      <!-- Representative -->
+      <div class="flex flex-col">
+        <label for="representative" class="text-white mb-1 font-medium">Representative Name</label>
+        <input type="text" id="representative" placeholder="Enter Representative Name" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+               required>
+      </div>
+
+      <!-- Company Type -->
+      <div class="flex flex-col">
+        <label for="companyType" class="text-white mb-1 font-medium">Company Type</label>
+        <select id="companyType" class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400" required>
+          <option value="">Select Type</option>
+          <option>Private</option>
+          <option>Public</option>
+          <option>Non-Profit</option>
+        </select>
+      </div>
+
+      <!-- Operation Site Type -->
+      <div class="flex flex-col">
+        <label for="siteType" class="text-white mb-1 font-medium">Operation Site Type</label>
+        <select id="siteType" class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400" required>
+          <option value="">Select Site Type</option>
+          <option>Urban</option>
+          <option>Rural</option>
+          <option>Industrial</option>
+        </select>
+      </div>
+
+      <!-- Email -->
+      <div class="flex flex-col">
+        <label for="companyEmail" class="text-white mb-1 font-medium">Email</label>
+        <input type="email" id="companyEmail" placeholder="Enter Email" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+               required>
+      </div>
+
+      <!-- Phone -->
+      <div class="flex flex-col">
+        <label for="companyPhone" class="text-white mb-1 font-medium">Cellphone Number</label>
+        <input type="tel" id="companyPhone" placeholder="Enter Phone Number" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+               required>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="col-span-1 md:col-span-2">
+        <button type="submit" 
+                class="w-full bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-md font-semibold flex justify-center items-center transition">
+          <i class="fas fa-plus mr-2"></i> Register Company
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Temporary Company Grid -->
+  <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+    <h2 class="font-semibold mb-4 text-sky-900">Temporary Company List</h2>
+    <table class="w-full table-auto border-collapse">
+      <thead>
+        <tr class="bg-sky-600 text-white">
+          <th class="px-3 py-2">Verification Code</th>
+          <th class="px-3 py-2">Company Name</th>
+          <th class="px-3 py-2">Representative</th>
+          <th class="px-3 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="companyGrid" class="divide-y divide-gray-300"></tbody>
+    </table>
+  </div>
+
+  <!-- DIL / Receipt Section -->
+  <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+    <h2 class="font-semibold mb-4 text-sky-900">DIL Receipt</h2>
+    <button id="generateDIL" 
+            class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md font-semibold transition mb-4">
+      Generate DIL
+    </button>
+    <div id="dilReceipt" class="p-4 bg-white border border-gray-300 rounded-lg font-mono whitespace-pre-wrap hidden"></div>
+  </div>
+
+  <script>
+    let companies = [];
+    let dilCounter = 1;
+
+    const companyForm = document.getElementById("companyForm");
+    const companyGrid = document.getElementById("companyGrid");
+    const generateDILBtn = document.getElementById("generateDIL");
+    const dilReceipt = document.getElementById("dilReceipt");
+
+    // Render grid
+    function renderGrid() {
+      companyGrid.innerHTML = "";
+      companies.forEach((c, index) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-sky-50 transition";
+        tr.innerHTML = `
+          <td class="px-3 py-2 font-mono">${c.verificationCode}</td>
+          <td class="px-3 py-2">${c.registeredName}</td>
+          <td class="px-3 py-2">${c.representative}</td>
+          <td class="px-3 py-2 space-x-2">
+            <button onclick="editCompany(${index})" class="text-yellow-500 hover:text-yellow-700"><i class="fas fa-pen"></i></button>
+            <button onclick="deleteCompany(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+          </td>
+        `;
+        companyGrid.appendChild(tr);
+      });
+    }
+
+    // Add company
+    companyForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      // Get values
+      const companyNumber = document.getElementById("companyNumber").value.trim();
+      const registeredName = document.getElementById("registeredName").value.trim();
+      const representative = document.getElementById("representative").value.trim();
+      const companyType = document.getElementById("companyType").value;
+      const siteType = document.getElementById("siteType").value;
+      const companyEmail = document.getElementById("companyEmail").value.trim();
+      const companyPhone = document.getElementById("companyPhone").value.trim();
+
+      // Verification Code
+      const verificationCode = `2026/101100/${dilCounter.toString().padStart(3,'0')}`;
+
+      // Confirm admin
+      const username = prompt("Enter username to confirm addition:");
+      if(username !== "KX0011" && username !== "KX1011") {
+        alert("Invalid username, company not added!");
+        return;
+      }
+
+      companies.push({ verificationCode, companyNumber, registeredName, representative, companyType, siteType, companyEmail, companyPhone });
+      dilCounter++;
+
+      renderGrid();
+      companyForm.reset();
+    });
+
+    // Edit company
+    function editCompany(index) {
+      const c = companies[index];
+      const username = prompt("Enter username to confirm edit:");
+      if(username !== "KX0011" && username !== "KX1011") {
+        alert("Invalid username, edit cancelled!");
+        return;
+      }
+
+      document.getElementById("companyNumber").value = c.companyNumber;
+      document.getElementById("registeredName").value = c.registeredName;
+      document.getElementById("representative").value = c.representative;
+      document.getElementById("companyType").value = c.companyType;
+      document.getElementById("siteType").value = c.siteType;
+      document.getElementById("companyEmail").value = c.companyEmail;
+      document.getElementById("companyPhone").value = c.companyPhone;
+
+      companies.splice(index,1);
+      renderGrid();
+    }
+
+    // Delete company
+    function deleteCompany(index) {
+      const username = prompt("Enter username to confirm deletion:");
+      if(username !== "KX0011" && username !== "KX1011") {
+        alert("Invalid username, delete cancelled!");
+        return;
+      }
+      companies.splice(index,1);
+      renderGrid();
+    }
+
+    // Generate DIL
+    generateDILBtn.addEventListener("click", function() {
+      if(companies.length < 1) {
+        alert("Add at least 1 company before generating DIL!");
+        return;
+      }
+
+      const now = new Date();
+      let dilText = `DIL No: 2026/101100\nDate: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}\n\n`;
+
+      companies.forEach((c, i) => {
+        dilText += `Verification Code: ${c.verificationCode}\n`;
+        dilText += `Company Number: ${c.companyNumber}\n`;
+        dilText += `Registered Name: ${c.registeredName}\n`;
+        dilText += `Representative: ${c.representative}\n`;
+        dilText += `Company Type: ${c.companyType}\n`;
+        dilText += `Site Type: ${c.siteType}\n`;
+        dilText += `Email: ${c.companyEmail}\n`;
+        dilText += `Phone: ${c.companyPhone}\n`;
+        dilText += `---------------------------\n`;
+      });
+
+      dilReceipt.textContent = dilText;
+      dilReceipt.classList.remove("hidden");
+
+      // Download option
+      const blob = new Blob([dilText], {type: "text/plain;charset=utf-8"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `DIL_Receipt.txt`;
+      link.textContent = "Download DIL TXT";
+      link.className = "inline-block mt-2 bg-sky-500 text-white px-3 py-1 rounded-md hover:bg-sky-600 transition";
+      dilReceipt.appendChild(link);
+    });
+  </script>
+
+</body>
+</html>

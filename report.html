@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AfricaSpani | Attendance Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body { background:#e0f2fe; }
+</style>
+</head>
+
+<body class="min-h-screen p-6">
+
+<!-- HEADER -->
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+    <i class="fa-solid fa-database"></i> AfricaSpani Attendance Report
+  </h1>
+  <p id="dateTime" class="text-gray-700"></p>
+</div>
+
+<!-- REPORT SETUP -->
+<div class="bg-[#010a1f] p-6 rounded-lg shadow-lg max-w-3xl mx-auto text-white mb-6">
+  <h2 class="text-xl font-bold mb-4">Report Configuration</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <select id="reportType" class="p-2 rounded text-black">
+      <option value="">Select Report Type</option>
+      <option value="Weekly">Weekly</option>
+      <option value="Monthly">Monthly</option>
+    </select>
+
+    <input id="companyName" placeholder="Company Name" class="p-2 rounded text-black"/>
+
+    <input id="capacity" type="number" placeholder="Capacity of Workers" class="p-2 rounded text-black"/>
+  </div>
+
+  <button onclick="generateReport()"
+    class="mt-6 w-full bg-sky-600 hover:bg-sky-700 py-2 rounded font-semibold">
+    Generate Report
+  </button>
+</div>
+
+<!-- REPORT OUTPUT -->
+<div id="reportSection" class="hidden bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+  <h2 class="text-xl font-bold mb-4 text-gray-800">
+    AfricaSpani Database
+  </h2>
+
+  <p class="mb-3">
+    Dear <span id="rCompany" class="font-semibold"></span>,
+  </p>
+
+  <p class="mb-3">
+    Here is your <span id="rType" class="font-semibold"></span> attendance report
+    based on the Digital Attendance System.
+  </p>
+
+  <p class="mb-3">
+    We were given a number of <span id="rCapacity"></span> workers to be captured
+    as digital attendees.
+    <span id="rCaptured" class="font-semibold"></span> candidates were successfully captured.
+  </p>
+
+  <p class="mb-3">
+    Date & Time Generated:
+    <span id="rDate" class="font-semibold"></span>
+  </p>
+
+  <p class="mt-6 font-semibold">
+    Authority:
+  </p>
+  <p>
+    Data Security Engineer<br>
+    Data Admin Technologist
+  </p>
+
+  <p class="mt-6 text-sm text-gray-600">
+    Powered by <strong>BlackLogic Technologies Hardware and Projects (Pty) Ltd</strong>
+  </p>
+
+  <button onclick="window.print()"
+    class="mt-6 w-full bg-gray-800 hover:bg-black text-white py-2 rounded font-semibold">
+    Print Report
+  </button>
+</div>
+
+<script>
+/* CLOCK */
+setInterval(()=>{
+  dateTime.innerText = new Date().toLocaleString();
+},1000);
+
+/* GENERATE REPORT */
+function generateReport(){
+  const type = reportType.value;
+  const company = companyName.value.trim();
+  const capacityVal = capacity.value;
+
+  if(!type || !company || !capacityVal){
+    alert("Complete all fields");
+    return;
+  }
+
+  /* Load attendance records */
+  let totalCaptured = 0;
+  for(let key in localStorage){
+    if(key.startsWith("attendance_")){
+      try {
+        totalCaptured += JSON.parse(localStorage.getItem(key)).length;
+      } catch {}
+    }
+  }
+
+  /* Fill report */
+  rCompany.innerText = company;
+  rType.innerText = type.toLowerCase();
+  rCapacity.innerText = capacityVal;
+  rCaptured.innerText = totalCaptured;
+  rDate.innerText = new Date().toLocaleString();
+
+  reportSection.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>

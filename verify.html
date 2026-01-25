@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AfricaSpani | Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body { background:#020617; color:#7dd3fc; }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-center items-center px-6">
+
+<h1 class="text-3xl font-bold mb-2">Biometric Verification</h1>
+<p class="mb-8 opacity-80">Fingerprint → Face ID</p>
+
+<!-- GRID -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 w-full max-w-xl">
+
+  <!-- Fingerprint -->
+  <div class="border border-sky-400 rounded-xl p-6 text-center">
+    <i class="fas fa-fingerprint text-6xl mb-4"></i>
+    <h2 class="text-xl font-semibold">Fingerprint</h2>
+    <p class="text-sm opacity-70">Step 1</p>
+  </div>
+
+  <!-- Face -->
+  <div class="border border-sky-400 rounded-xl p-6 text-center">
+    <i class="fas fa-face-smile text-6xl mb-4"></i>
+    <h2 class="text-xl font-semibold">Face ID</h2>
+    <p class="text-sm opacity-70">Step 2</p>
+  </div>
+
+</div>
+
+<!-- START BUTTON -->
+<button onclick="startVerification()"
+class="bg-sky-600 hover:bg-sky-700 px-8 py-3 rounded-lg font-semibold">
+Start Verification
+</button>
+
+<script>
+function startVerification(){
+  // Clear previous session
+  localStorage.removeItem("biometricID");
+  localStorage.removeItem("faceID");
+
+  // Start fingerprint first
+  window.location.href = "finger.html";
+}
+</script>
+
+</body>
+</html>

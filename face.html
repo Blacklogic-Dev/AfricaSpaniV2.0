@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Facial Recognition</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    video {
+      transform: scaleX(-1); /* Mirror effect for front camera */
+    }
+    
+    .glow-text {
+      text-shadow: 0 0 10px #22c55e, 0 0 20px #16a34a;
+    }
+    
+    .countdown {
+      font-size: 3rem;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .timer-container {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #22c55e;
+      border-radius: 12px;
+      padding: 20px 40px;
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center text-white bg-black">
+
+  <!-- Header -->
+  <div class="w-full py-6 text-center border-b border-green-600/30">
+    <h1 class="text-4xl font-bold text-green-400 glow-text tracking-widest">
+      AI FACIAL RECOGNITION
+    </h1>
+  </div>
+
+  <!-- Video Stream -->
+  <div class="flex-1 w-full flex items-center justify-center">
+    <video id="videoFeed" autoplay playsinline muted class="w-full h-full object-cover bg-black"></video>
+  </div>
+
+  <!-- Controls - Countdown Timer -->
+  <div class="w-full py-8 flex flex-col items-center justify-center gap-6 border-t border-green-600/30">
+    <div class="timer-container text-center">
+      <div class="countdown text-green-400 glow-text" id="countdown">00:05</div>
+      <div class="text-sm text-green-400 mt-3 font-mono">Scanning Face...</div>
+    </div>
+    
+    <div id="resetMessage" class="hidden text-center">
+      <div class="text-lg text-green-400 font-mono mb-2">Scan Complete ✓</div>
+      <div class="countdown text-green-400 glow-text" id="resetCountdown">10</div>
+      <div class="text-sm text-green-400 mt-3 font-mono">Redirecting to Next Step...</div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    // Front Camera Stream
+    async function startVideo() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" }, // front camera
+          audio: false
+        });
+        document.getElementById('videoFeed').srcObject = stream;
+        startCountdown();
+      } catch (err) {
+        console.error("Camera error:", err.message);
+        alert("Camera not accessible: " + err.message);
+      }
+    }
+
+    // Main countdown 5 seconds
+    function startCountdown() {
+      let seconds = 5;
+      const countdownEl = document.getElementById('countdown');
+      
+      const timer = setInterval(() => {
+        const min = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+        countdownEl.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        
+        seconds--;
+        
+        if (seconds < 0) {
+          clearInterval(timer);
+          startResetCountdown();
+        }
+      }, 1000);
+    }
+
+    // Reset countdown 10 seconds then redirect
+    function startResetCountdown() {
+      document.getElementById('countdown').parentElement.classList.add('hidden');
+      document.getElementById('resetMessage').classList.remove('hidden');
+      
+      let resetSeconds = 10;
+      const resetCountdownEl = document.getElementById('resetCountdown');
+      
+      const resetTimer = setInterval(() => {
+        resetCountdownEl.textContent = String(resetSeconds).padStart(2, '0');
+        resetSeconds--;
+        
+        if (resetSeconds < 0) {
+          clearInterval(resetTimer);
+          window.location.href = 'verify.html';
+        }
+      }, 1000);
+    }
+
+    startVideo();
+  </script>
+
+</body>
+</html>

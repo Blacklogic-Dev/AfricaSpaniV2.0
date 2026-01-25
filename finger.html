@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Biometric Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body {
+    background:#020617;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-family:Arial, sans-serif;
+    color:#7dd3fc;
+  }
+
+  .container {
+    text-align:center;
+  }
+
+  h1 { margin-bottom:5px; }
+  h3 { font-weight:normal; opacity:0.8; margin-bottom:25px; }
+
+  .fingerprint {
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    border:4px solid #38bdf8;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:80px;
+    cursor:pointer;
+    transition:0.3s;
+    margin:auto;
+    user-select:none;
+  }
+
+  .fingerprint.green { border-color:#22c55e; color:#22c55e; }
+  .fingerprint.red { border-color:#ef4444; color:#ef4444; }
+
+  .status {
+    margin-top:20px;
+    font-size:15px;
+  }
+
+  .approved {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:linear-gradient(#0f172a 1px, transparent 1px),
+               linear-gradient(90deg, #0f172a 1px, transparent 1px);
+    background-size:40px 40px;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:#22c55e;
+    flex-direction: column;
+    font-family: monospace;
+  }
+
+  .approved h1 {
+    font-size:28px;
+    margin-bottom:20px;
+  }
+
+  .proceed-btn {
+    margin-top:10px;
+    padding:12px 22px;
+    font-size:14px;
+    font-weight:bold;
+    background:#22c55e;
+    color:#020617;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .proceed-btn:hover {
+    background:#16a34a;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- BIOMETRIC SCREEN -->
+<div class="container" id="bioScreen">
+  <h1>AfricaSpani</h1>
+  <h3>Biometric Verification</h3>
+
+  <div id="fingerprint" class="fingerprint">
+    <i class="fas fa-fingerprint"></i>
+  </div>
+
+  <div id="status" class="status">
+    Touch and hold for 6 seconds
+  </div>
+</div>
+
+<!-- APPROVED SCREEN -->
+<div class="approved" id="approvedScreen">
+  <h1>✅ Verification Approved</h1>
+
+  <button class="proceed-btn" onclick="proceedToFace()">
+    <i class="fa-solid fa-camera"></i>
+    Proceed to Face Verification
+  </button>
+</div>
+
+<script>
+const fingerprint = document.getElementById("fingerprint");
+const statusText = document.getElementById("status");
+const bioScreen = document.getElementById("bioScreen");
+const approvedScreen = document.getElementById("approvedScreen");
+
+let timer, countdownTimer;
+let seconds = 6;
+let startTime;
+
+function startHold() {
+  startTime = Date.now();
+  seconds = 6;
+
+  fingerprint.classList.add("green");
+  statusText.textContent = `Scanning... ${seconds}s`;
+
+  countdownTimer = setInterval(() => {
+    seconds--;
+    statusText.textContent = `Scanning... ${seconds}s`;
+  }, 1000);
+
+  timer = setTimeout(approved, 6000);
+}
+
+function stopHold() {
+  clearTimeout(timer);
+  clearInterval(countdownTimer);
+
+  if (Date.now() - startTime < 6000) {
+    fingerprint.classList.remove("green");
+    fingerprint.classList.add("red");
+    statusText.textContent = "Verification Failed ❌";
+
+    setTimeout(() => {
+      fingerprint.classList.remove("red");
+      statusText.textContent = "Touch and hold for 6 seconds";
+    }, 1500);
+  }
+}
+
+function approved() {
+  bioScreen.style.display = "none";
+  approvedScreen.style.display = "flex";
+}
+
+function proceedToFace() {
+  window.location.href = "face.html";
+}
+
+/* Desktop */
+fingerprint.addEventListener("mousedown", startHold);
+fingerprint.addEventListener("mouseup", stopHold);
+fingerprint.addEventListener("mouseleave", stopHold);
+
+/* Mobile */
+fingerprint.addEventListener("touchstart", startHold);
+fingerprint.addEventListener("touchend", stopHold);
+</script>
+
+</body>
+</html>

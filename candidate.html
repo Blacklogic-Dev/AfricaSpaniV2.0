@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AfricaSpani | Candidates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between mb-6">
+    <a href="dashboard.html" class="text-sky-600 font-semibold">
+      <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <h1 class="text-xl font-bold">Candidate Data Capture</h1>
+  </div>
+
+  <!-- FORM -->
+  <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <h2 class="font-semibold mb-4">Add / Edit Candidate</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <input id="acceptanceId" placeholder="Acceptance ID" class="border p-2 rounded bg-gray-100" disabled />
+      <input id="name" placeholder="Name & Surname" class="border p-2 rounded">
+      <input id="email" placeholder="Email" class="border p-2 rounded">
+      <input id="age" placeholder="Age" type="number" class="border p-2 rounded">
+      <input id="job" placeholder="Job Title" class="border p-2 rounded">
+      <input id="cell" placeholder="Cellphone Number" class="border p-2 rounded">
+      <input id="address" placeholder="Address" class="border p-2 rounded">
+      <input id="experience" placeholder="Experience (years)" class="border p-2 rounded">
+
+      <select id="availability" class="border p-2 rounded">
+        <option value="">Availability</option>
+        <option value="immediate">⚡ Immediately</option>
+        <option value="1week">📅 1 Week</option>
+        <option value="2weeks">😔 2 Weeks or More</option>
+      </select>
+
+      <select id="status" class="border p-2 rounded">
+        <option value="">Status</option>
+        <option>Qualified</option>
+        <option>In Progress</option>
+        <option>Rejected</option>
+      </select>
+    </div>
+
+    <button onclick="saveCandidate()" class="mt-4 bg-sky-500 text-white px-4 py-2 rounded hover:bg-sky-600 transition">
+      <i class="fas fa-save"></i> Save Candidate
+    </button>
+  </div>
+
+  <!-- TEMP GRID -->
+  <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <h2 class="font-semibold mb-4">Temporary Candidate Grid</h2>
+
+    <table class="w-full border">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="p-2 text-left">Acceptance ID</th>
+          <th class="text-left">Name</th>
+          <th class="text-left">Age</th>
+          <th class="text-left">Job Title</th>
+          <th class="text-center">Availability</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="grid"></tbody>
+    </table>
+
+    <div class="flex justify-between items-center mt-4">
+      <input id="numCandidates" type="number" min="5" max="100" placeholder="Number of Candidates (5-100)" class="border p-2 rounded w-60" />
+      <button
+        id="dilBtn"
+        onclick="generateDIL()"
+        disabled
+        class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-40 transition">
+        Generate DIL Receipt
+      </button>
+    </div>
+  </div>
+
+  <!-- RECEIPT -->
+  <div id="receipt" class="hidden bg-white mt-8 p-6 shadow-lg">
+    <h2 class="text-center font-bold mb-4">DIL RECEIPT</h2>
+    <p id="receiptMeta" class="text-sm mb-4"></p>
+    <div id="receiptBody" class="text-sm font-mono whitespace-pre-wrap"></div>
+  </div>
+
+<script>
+let candidates = [];
+let editIndex = null;
+
+// Generate Acceptance ID 2625 + random 4 digits
+function generateAcceptanceId() {
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `2625-${random}`;
+}
+
+// Initialize Acceptance ID field on page load
+window.addEventListener('load', () => {
+  document.getElementById('acceptanceId').value = generateAcceptanceId();
+});
+
+function confirmUser(action) {
+  const u = prompt(`Confirm admin username to ${action}:`);
+  return (u === "KX0011" || u === "KX1011");
+}
+
+function saveCandidate() {
+  if (!confirmUser("save candidate")) return;
+
+  const c = {
+    id: acceptanceId.value,
+    name: name.value,
+    email: email.value,
+    age: age.value,
+    job: job.value,
+    cell: cell.value,
+    address: address.value,
+    experience: experience.value,
+    status: status.value,
+    availability: availability.value
+  };
+
+  if (editIndex !== null) {
+    candidates[editIndex] = c;
+    editIndex = null;
+  } else {
+    if (candidates.length >= 100) {
+      alert("Maximum 100 candidates per DIL batch.");
+      return;
+    }
+    candidates.push(c);
+  }
+
+  clearForm();
+  document.getElementById('acceptanceId').value = generateAcceptanceId();
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = "";
+
+  candidates.forEach((c, i) => {
+    let availIcon = '';
+    if (c.availability === "immediate") availIcon = '⚡';
+    else if (c.availability === "1week") availIcon = '📅';
+    else if (c.availability === "2weeks") availIcon = '😔';
+
+    grid.innerHTML += `
+      <tr class="border-b">
+        <td class="p-2 font-mono">${c.id}</td>
+        <td>${c.name}</td>
+        <td>${c.age}</td>
+        <td>${c.job}</td>
+        <td class="text-center text-xl">${availIcon}</td>
+        <td class="text-center">
+          <button onclick="editCandidate(${i})" class="text-blue-600 mr-2"><i class="fas fa-pen"></i></button>
+          <button onclick="deleteCandidate(${i})" class="text-red-600"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('dilBtn').disabled = candidates.length < 5;
+}
+
+function editCandidate(i) {
+  if (!confirmUser("edit candidate")) return;
+
+  const c = candidates[i];
+  acceptanceId.value = c.id;
+  name.value = c.name;
+  email.value = c.email;
+  age.value = c.age;
+  job.value = c.job;
+  cell.value = c.cell;
+  address.value = c.address;
+  experience.value = c.experience;
+  status.value = c.status;
+  availability.value = c.availability;
+  editIndex = i;
+}
+
+function deleteCandidate(i) {
+  if (!confirmUser("delete candidate")) return;
+  candidates.splice(i, 1);
+  renderGrid();
+}
+
+function generateDIL() {
+  if (!confirmUser("generate DIL receipt")) return;
+
+  const receipt = document.getElementById('receipt');
+  const receiptMeta = document.getElementById('receiptMeta');
+  const receiptBody = document.getElementById('receiptBody');
+
+  receipt.classList.remove("hidden");
+
+  const now = new Date();
+  receiptMeta.innerText = `Date: ${now.toLocaleString()}\nDIL No: 2026 / ${Math.floor(100000 + Math.random()*900000)}`;
+
+  receiptBody.innerHTML = "";
+  candidates.forEach((c, i) => {
+    receiptBody.innerHTML += `
+Candidate ${i + 1}
+Acceptance ID: ${c.id}
+Name: ${c.name}
+Age: ${c.age}
+Email: ${c.email}
+Job Title: ${c.job}
+Experience: ${c.experience}
+Cellphone: ${c.cell}
+Status: ${c.status}
+Availability: ${c.availability}
+-----------------------------
+`;
+  });
+}
+
+function clearForm() {
+  document.querySelectorAll("input, select").forEach(e => e.value = "");
+}
+</script>
+
+</body>
+</html>
