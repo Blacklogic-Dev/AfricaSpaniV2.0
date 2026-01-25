@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AfricaSpani Secure AI Terminal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    background: #000;
+    margin: 0;
+    font-family: monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  #terminal {
+    width: 92%;
+    max-width: 960px;
+    height: 90vh;
+    background: #020617;
+    padding: 20px;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 30px #22c55e;
+  }
+
+  .line { margin: 4px 0; white-space: pre-wrap; }
+  .green  { color: #22c55e; }
+  .blue   { color: #38bdf8; }
+  .yellow { color: #facc15; }
+  .red    { color: #ef4444; }
+</style>
+</head>
+
+<body>
+
+<div id="terminal"></div>
+
+<script>
+const terminal = document.getElementById("terminal");
+
+const SPEED = 1500;
+const TYPE_SPEED = 25;
+
+// ---------- HELPERS ----------
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+function randomIP() {
+  return `${rand(10,192)}.${rand(0,255)}.${rand(0,255)}.${rand(1,254)}`;
+}
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function binaryLine() {
+  return Array.from({length: 32}, () => Math.round(Math.random())).join("");
+}
+
+function encryptedLine() {
+  const chars = "A1B9F0C23D4E56789XYZ@#$%";
+  return Array.from({length: 40}, () =>
+    chars[Math.floor(Math.random()*chars.length)]
+  ).join("");
+}
+
+async function typeLine(text, color) {
+  const div = document.createElement("div");
+  div.className = `line ${color}`;
+  terminal.appendChild(div);
+
+  for (let c of text) {
+    div.textContent += c;
+    terminal.scrollTop = terminal.scrollHeight;
+    await delay(TYPE_SPEED);
+  }
+}
+
+// ---------- MAIN SEQUENCE ----------
+async function runCycle() {
+
+  const ip = randomIP();
+
+  const core = [
+    {t:">>> Backend System Activated", c:"blue"},
+    {t:">>> Network Interface Initializing...", c:"yellow"},
+    {t:`>>> Local IP Address Detected: ${ip}`, c:"green"},
+    {t:">>> Gateway & Subnet Scan Complete", c:"green"},
+    {t:">>> Firewall Status: ACTIVE", c:"green"},
+    {t:">>> IDS / IPS Monitoring Enabled", c:"green"},
+    {t:">>> Secure Tunnel Established (TLS 1.3)", c:"blue"},
+    {t:">>> VPN Layer Masking Geo-Location", c:"yellow"},
+    {t:">>> Network Integrity Check Passed ✔", c:"green"},
+    {t:">>> Encrypted Channel Locked [AES-256]", c:"green"},
+    {t:">>> Authenticating Biometric Key...", c:"yellow"},
+    {t:">>> Biometric Signature Verified ✔", c:"green"},
+    {t:">>> Session Token Generated", c:"blue"},
+    {t:">>> API Handshake Confirmed", c:"blue"},
+    {t:">>> Access Granted", c:"green"},
+    {t:">>> Initializing Data Capture Pipeline...", c:"yellow"}
+  ];
+
+  for (let l of core) {
+    await typeLine(l.t, l.c);
+    await delay(SPEED);
+  }
+
+  // Binary stream
+  await typeLine(">>> Streaming Raw Network Packets...", "yellow");
+  await delay(SPEED);
+  for (let i=0;i<10;i++){
+    await typeLine(binaryLine(), "green");
+    await delay(300);
+  }
+
+  // Encryption
+  await typeLine(">>> Encrypting Biometric Payload...", "yellow");
+  await delay(SPEED);
+  for (let i=0;i<10;i++){
+    await typeLine(encryptedLine(), "blue");
+    await delay(300);
+  }
+
+  // AI + Cloud
+  await delay(SPEED);
+  await typeLine(">>> AI Machine Learning Clustering Complete", "green");
+  await delay(SPEED);
+  await typeLine(">>> Data Secured & Uploaded to Cloud Infrastructure ✔", "green");
+  await delay(SPEED);
+  await typeLine(">>> Session Closed | System Resetting...\n", "red");
+  await delay(SPEED);
+
+  runCycle();
+}
+
+runCycle();
+</script>
+
+</body>
+</html>
