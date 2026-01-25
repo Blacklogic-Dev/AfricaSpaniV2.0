@@ -87,6 +87,39 @@
                required>
       </div>
 
+      <!-- Initials (for Records) -->
+      <div class="flex flex-col">
+        <label for="recordInitials" class="text-white mb-1 font-medium">Initials</label>
+        <input type="text" id="recordInitials" placeholder="e.g., JD" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400"
+               maxlength="5">
+      </div>
+
+      <!-- Job (for Records) -->
+      <div class="flex flex-col">
+        <label for="recordJob" class="text-white mb-1 font-medium">Job Title</label>
+        <input type="text" id="recordJob" placeholder="e.g., Manager" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400">
+      </div>
+
+      <!-- Face Status (for Records) -->
+      <div class="flex flex-col">
+        <label for="recordFace" class="text-white mb-1 font-medium">Face Status</label>
+        <select id="recordFace" class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400">
+          <option value="">Select Status</option>
+          <option>Verified</option>
+          <option>Pending</option>
+          <option>Failed</option>
+        </select>
+      </div>
+
+      <!-- Bio (for Records) -->
+      <div class="flex flex-col">
+        <label for="recordBio" class="text-white mb-1 font-medium">Bio</label>
+        <input type="text" id="recordBio" placeholder="e.g., Employee Info" 
+               class="bg-sky-800 text-white border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-400">
+      </div>
+
       <!-- Submit Button -->
       <div class="col-span-1 md:col-span-2">
         <button type="submit" 
@@ -124,14 +157,32 @@
     <div id="dilReceipt" class="p-4 bg-white border border-gray-300 rounded-lg font-mono whitespace-pre-wrap hidden"></div>
   </div>
 
+  <!-- Records Table Section -->
+  <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+    <h2 class="font-semibold mb-4 text-sky-900">Records List</h2>
+    <table class="w-full table-auto border-collapse">
+      <thead>
+        <tr class="bg-sky-600 text-white">
+          <th class="px-3 py-2">Initials</th>
+          <th class="px-3 py-2">Job</th>
+          <th class="px-3 py-2">Face</th>
+          <th class="px-3 py-2">Bio</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody" class="divide-y divide-gray-300"></tbody>
+    </table>
+  </div>
+
   <script>
     let companies = [];
+    let records = [];
     let dilCounter = 1;
 
     const companyForm = document.getElementById("companyForm");
     const companyGrid = document.getElementById("companyGrid");
     const generateDILBtn = document.getElementById("generateDIL");
     const dilReceipt = document.getElementById("dilReceipt");
+    const tableBody = document.getElementById("tableBody");
 
     // Render grid
     function renderGrid() {
@@ -149,6 +200,20 @@
           </td>
         `;
         companyGrid.appendChild(tr);
+      });
+    }
+
+    // Render table for records
+    function renderTable(){
+      tableBody.innerHTML = "";
+      records.forEach(r=>{
+        tableBody.innerHTML += `
+          <tr class="border-b text-center hover:bg-sky-50 transition">
+            <td class="p-2">${r.initials}</td>
+            <td class="p-2">${r.job}</td>
+            <td class="p-2">${r.face}</td>
+            <td class="p-2">${r.bio}</td>
+          </tr>`;
       });
     }
 
@@ -176,6 +241,23 @@
       }
 
       companies.push({ verificationCode, companyNumber, registeredName, representative, companyType, siteType, companyEmail, companyPhone });
+      
+      // Add to records table
+      const recordInitials = document.getElementById("recordInitials").value.trim();
+      const recordJob = document.getElementById("recordJob").value.trim();
+      const recordFace = document.getElementById("recordFace").value;
+      const recordBio = document.getElementById("recordBio").value.trim();
+      
+      if(recordInitials || recordJob || recordFace || recordBio) {
+        records.push({
+          initials: recordInitials || "-",
+          job: recordJob || "-",
+          face: recordFace || "-",
+          bio: recordBio || "-"
+        });
+        renderTable();
+      }
+      
       dilCounter++;
 
       renderGrid();
