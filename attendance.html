@@ -3,22 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📊 Attendance Database</title>
+<title>AfricaSpani Attendance System</title>
 
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- jsPDF AutoTable (FOR EXACT TABLE) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
 <style>
   body { background:#e0f2fe; }
-  input, select { 
-    color: black !important; 
-    background: white !important; 
-    border: 2px solid #333 !important;
-  }
-  input::placeholder { color: #999 !important; }
-  input:focus { 
-    color: black !important; 
+  input, select {
+    color: black !important;
     background: white !important;
+    border: 2px solid #333 !important;
   }
   .locked { opacity:0.4; pointer-events:none; }
 </style>
@@ -30,7 +34,7 @@
 <div class="mb-6 flex items-center gap-3">
   <i class="fa-solid fa-database text-3xl text-sky-600"></i>
   <div>
-    <h1 class="text-3xl font-bold text-gray-800">Attendance Database</h1>
+    <h1 class="text-3xl font-bold text-gray-800">AfricaSpani Attendance Database</h1>
     <p id="dateTime" class="text-gray-700"></p>
   </div>
 </div>
@@ -41,7 +45,7 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <input id="companyName" placeholder="Company Name" class="p-2 rounded"/>
-    <input id="capacity" type="number" min="1" placeholder="Capacity to Capture" class="p-2 rounded"/>
+    <input id="capacity" type="number" min="1" placeholder="Capacity" class="p-2 rounded"/>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
@@ -65,17 +69,14 @@
       <option>OTHER</option>
     </select>
 
-    <button id="startCapture"
-      class="bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold">
+    <button id="startCapture" class="bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold">
       Start Capture
     </button>
   </div>
 </div>
 
 <!-- EMPLOYEE DETAILS -->
-<div id="employeeSection"
- class="bg-[#010a1f] p-6 rounded-lg shadow-lg max-w-5xl mx-auto text-white mb-6 locked">
-
+<div id="employeeSection" class="bg-[#010a1f] p-6 rounded-lg shadow-lg max-w-5xl mx-auto text-white mb-6 locked">
   <h2 class="text-xl font-bold mb-4">Employee Details</h2>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,25 +90,19 @@
   </div>
 
   <div class="mt-4 flex gap-4 items-center">
-    <button id="verifyBtn"
-      class="bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded font-semibold flex items-center gap-2">
-      <i class="fa-solid fa-fingerprint"></i>
-      Start Verification
+    <button id="verifyBtn" class="bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded font-semibold">
+      <i class="fa-solid fa-fingerprint"></i> Verify
     </button>
-
     <span id="countdown" class="font-bold text-yellow-300"></span>
   </div>
 
-  <button id="saveData"
-    class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold">
+  <button id="saveData" class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold">
     Save Data
   </button>
 </div>
 
 <!-- TABLE -->
 <div class="bg-white p-6 rounded-lg shadow-lg max-w-6xl mx-auto">
-  <h2 class="font-semibold mb-4 text-gray-800">Captured Attendance</h2>
-
   <table class="w-full border text-sm">
     <thead class="bg-sky-500 text-white">
       <tr>
@@ -120,147 +115,118 @@
     <tbody id="tableBody"></tbody>
   </table>
 
-  <div class="mt-6 flex gap-4">
-    <button id="printDetails"
-      class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded font-semibold flex-1 hidden">
-      <i class="fa-solid fa-print mr-2"></i>Print Company Details & Attendance
-    </button>
-
-    <button id="printReceipt"
-      class="bg-gray-800 hover:bg-black text-white px-6 py-2 rounded font-semibold flex-1 hidden">
-      <i class="fa-solid fa-print mr-2"></i>Print Receipt
+  <div class="mt-6">
+    <button id="printReceipt" class="bg-gray-900 text-white px-6 py-2 rounded font-semibold hidden w-full">
+      Download PDF Receipt
     </button>
   </div>
 </div>
 
 <script>
-/* ===== DOM CACHE ===== */
-const dateTime = document.getElementById("dateTime");
-const companySection = document.getElementById("companySection");
-const employeeSection = document.getElementById("employeeSection");
-
-const companyName = document.getElementById("companyName");
-const capacity = document.getElementById("capacity");
-const authority = document.getElementById("authority");
-const timeType = document.getElementById("timeType");
-const companyType = document.getElementById("companyType");
-
-const startCapture = document.getElementById("startCapture");
-const verifyBtn = document.getElementById("verifyBtn");
-const saveData = document.getElementById("saveData");
-
-const initials = document.getElementById("initials");
-const jobTitle = document.getElementById("jobTitle");
-const faceID = document.getElementById("faceID");
-const biometricID = document.getElementById("biometricID");
-const countdown = document.getElementById("countdown");
-
-const tableBody = document.getElementById("tableBody");
-const printReceipt = document.getElementById("printReceipt");
-const printDetails = document.getElementById("printDetails");
-
-/* ===== CLOCK ===== */
+/* CLOCK */
 setInterval(() => {
   dateTime.textContent = new Date().toLocaleString();
 }, 1000);
 
-/* ===== STATE ===== */
+/* STATE */
 let records = [];
 let capacityLimit = 0;
 let bioCounter = 1;
 let faceCounter = 1001;
-let verifyTimer = null;
 
-/* ===== START CAPTURE ===== */
+/* START CAPTURE */
 startCapture.onclick = () => {
   if (!companyName.value || !capacity.value || !authority.value || !timeType.value || !companyType.value) {
-    alert("⚠️ Please complete all company details");
+    alert("Complete company details");
     return;
   }
-
   capacityLimit = Number(capacity.value);
   companySection.classList.add("locked");
   employeeSection.classList.remove("locked");
 };
 
-/* ===== VERIFICATION ===== */
+/* VERIFICATION – 25 SECONDS */
 verifyBtn.onclick = () => {
-  if (records.length >= capacityLimit) {
-    alert("❌ Capacity already reached");
-    return;
-  }
-
   verifyBtn.disabled = true;
-  let timeLeft = 30;
-  countdown.textContent = `Verifying... ${timeLeft}s`;
+  let t = 25;
+  countdown.textContent = `Verifying... ${t}s`;
 
-  verifyTimer = setInterval(() => {
-    timeLeft--;
-    countdown.textContent = `Verifying... ${timeLeft}s`;
+  const timer = setInterval(() => {
+    t--;
+    countdown.textContent = `Verifying... ${t}s`;
 
-    if (timeLeft <= 0) {
-      clearInterval(verifyTimer);
-
-      const month = new Date().getMonth() + 1;
-      biometricID.value = `26/${month}/${String(bioCounter).padStart(3, "0")}`;
-      faceID.value = `26/${month}/${faceCounter}`;
-
-      bioCounter++;
-      faceCounter++;
-      countdown.textContent = "✔️ Verification Approved";
+    if (t <= 0) {
+      clearInterval(timer);
+      const m = new Date().getMonth() + 1;
+      faceID.value = `26/${m}/${faceCounter++}`;
+      biometricID.value = `26/${m}/${String(bioCounter++).padStart(3,"0")}`;
+      countdown.textContent = "✔ Verification Approved";
+      verifyBtn.disabled = false;
     }
   }, 1000);
 };
 
-/* ===== SAVE DATA ===== */
+/* SAVE DATA */
 saveData.onclick = () => {
-  if (!initials.value || !jobTitle.value || !faceID.value) {
-    alert("⚠️ Complete verification first");
-    return;
-  }
+  if (records.length >= capacityLimit) return alert("Capacity reached");
+  if (!faceID.value) return alert("Verify first");
 
-  if (records.length >= capacityLimit) {
-    alert("❌ Capacity reached");
-    return;
-  }
-
-  records.push({
+  const record = {
     initials: initials.value,
     job: jobTitle.value,
     face: faceID.value,
     bio: biometricID.value
-  });
+  };
 
-  renderTable();
+  records.push(record);
 
-  initials.value = "";
-  jobTitle.value = "";
-  faceID.value = "";
-  biometricID.value = "";
+  tableBody.innerHTML += `
+    <tr class="border-b text-center">
+      <td class="p-2">${record.initials}</td>
+      <td class="p-2">${record.job}</td>
+      <td class="p-2">${record.face}</td>
+      <td class="p-2">${record.bio}</td>
+    </tr>
+  `;
+
+  initials.value = jobTitle.value = faceID.value = biometricID.value = "";
   countdown.textContent = "";
-  verifyBtn.disabled = false;
 
   if (records.length >= capacityLimit) {
     printReceipt.classList.remove("hidden");
-    printDetails.classList.remove("hidden");
   }
 };
 
-/* ===== TABLE RENDER ===== */
-function renderTable() {
-  tableBody.innerHTML = "";
-  records.forEach(r => {
-    tableBody.innerHTML += `
-      <tr class="border-b text-center">
-        <td class="p-2">${r.initials}</td>
-        <td class="p-2">${r.job}</td>
-        <td class="p-2">${r.face}</td>
-        <td class="p-2">${r.bio}</td>
-      </tr>`;
-  });
-}
-</script>
+/* PDF DOWNLOAD – EXACT TABLE */
+printReceipt.onclick = () => {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
 
+  pdf.setFontSize(16);
+  pdf.text("AfricaSpani Database", 105, 15, { align: "center" });
+  pdf.setFontSize(12);
+  pdf.text("Digital Attendance List", 105, 22, { align: "center" });
+
+  pdf.setFont("courier","normal");
+  pdf.setFontSize(10);
+
+  pdf.text(`Company: ${companyName.value}`, 14, 35);
+  pdf.text(`Authority: ${authority.value}`, 14, 41);
+  pdf.text(`Company Type: ${companyType.value}`, 14, 47);
+  pdf.text(`Time Type: ${timeType.value}`, 14, 53);
+  pdf.text(`Capacity: ${capacityLimit}`, 14, 59);
+
+  pdf.autoTable({
+    startY: 70,
+    head: [["Initials", "Job Title", "Face ID", "Biometric ID"]],
+    body: records.map(r => [r.initials, r.job, r.face, r.bio]),
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [14, 165, 233] }
+  });
+
+  pdf.save("AfricaSpani_Digital_Attendance.pdf");
+};
+</script>
 
 </body>
 </html>
