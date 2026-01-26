@@ -10,7 +10,16 @@
 
 <style>
   body { background:#e0f2fe; }
-  input, select { color:black; background:white; }
+  input, select { 
+    color: black !important; 
+    background: white !important; 
+    border: 2px solid #333 !important;
+  }
+  input::placeholder { color: #999 !important; }
+  input:focus { 
+    color: black !important; 
+    background: white !important;
+  }
   .locked { opacity:0.4; pointer-events:none; }
 </style>
 </head>
