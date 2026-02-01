@@ -1,80 +1,577 @@
-<!DOCTYPE html>
-<html lang="en" class="bg-black">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Facial Recognition</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Facial Recognition</title><!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script><!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&amp;family=Share+Tech+Mono&amp;display=swap" rel="stylesheet">
   <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Exo 2', sans-serif;
+    }
+
     video {
       transform: scaleX(-1); /* Mirror effect for front camera */
     }
     
+    /* Tech Grid Background */
+    .tech-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(34, 197, 94, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
     .glow-text {
-      text-shadow: 0 0 10px #22c55e, 0 0 20px #16a34a;
+      text-shadow: 0 0 20px rgba(34, 197, 94, 0.8), 0 0 40px rgba(34, 197, 94, 0.5);
     }
     
     .countdown {
       font-size: 3rem;
       font-weight: bold;
       letter-spacing: 0.1em;
-      font-family: 'Courier New', monospace;
+      font-family: 'Share Tech Mono', monospace;
     }
     
     .timer-container {
-      background: rgba(0, 0, 0, 0.7);
-      border: 2px solid #22c55e;
+      background: rgba(34, 197, 94, 0.05);
+      border: 2px solid rgba(34, 197, 94, 0.3);
       border-radius: 12px;
       padding: 20px 40px;
       backdrop-filter: blur(10px);
     }
+
+    .hexagon {
+      width: 50px;
+      height: 50px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      background: linear-gradient(135deg, #22c55e, #10b981);
+    }
+
+    /* Video Container with Scanning Overlay */
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Face Detection Box */
+    .face-detection-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 400px;
+      border: 3px solid #22c55e;
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 30;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.5), inset 0 0 30px rgba(34, 197, 94, 0.2);
+    }
+
+    /* Animated Corners */
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 4px solid #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    .corner-tl {
+      top: -3px;
+      left: -3px;
+      border-right: none;
+      border-bottom: none;
+      border-top-left-radius: 8px;
+    }
+
+    .corner-tr {
+      top: -3px;
+      right: -3px;
+      border-left: none;
+      border-bottom: none;
+      border-top-right-radius: 8px;
+    }
+
+    .corner-bl {
+      bottom: -3px;
+      left: -3px;
+      border-right: none;
+      border-top: none;
+      border-bottom-left-radius: 8px;
+    }
+
+    .corner-br {
+      bottom: -3px;
+      right: -3px;
+      border-left: none;
+      border-top: none;
+      border-bottom-right-radius: 8px;
+    }
+
+    @keyframes corner-pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+      }
+    }
+
+    .corner {
+      animation: corner-pulse 2s ease-in-out infinite;
+    }
+
+    /* Scanning Laser Beam */
+    @keyframes scan-laser {
+      0% {
+        top: 0%;
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
+    }
+
+    .scan-laser {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #22c55e 30%, #22c55e 70%, transparent);
+      box-shadow: 
+        0 0 20px #22c55e,
+        0 0 40px #22c55e,
+        0 0 60px rgba(34, 197, 94, 0.5);
+      pointer-events: none;
+      z-index: 25;
+      animation: scan-laser 2.5s ease-in-out infinite;
+    }
+
+    /* Horizontal Scan Lines */
+    @keyframes scan-lines {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    .scan-lines {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .scan-lines::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 200%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 8px,
+        rgba(34, 197, 94, 0.08) 8px,
+        rgba(34, 197, 94, 0.08) 10px
+      );
+      animation: scan-lines 3s linear infinite;
+    }
+
+    /* Side Panels */
+    .side-panel {
+      background: rgba(34, 197, 94, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #22c55e;
+    }
+
+    .panel-content {
+      font-size: 12px;
+      color: rgba(34, 197, 94, 0.7);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .stat-value {
+      color: #22c55e;
+      font-weight: 600;
+    }
+
+    /* Progress Bars */
+    .progress-item {
+      margin-bottom: 15px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: rgba(34, 197, 94, 0.7);
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background: rgba(34, 197, 94, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #10b981);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+
+    /* Data Stream */
+    .data-stream {
+      max-height: 150px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .data-line {
+      font-size: 11px;
+      margin-bottom: 4px;
+      opacity: 0.6;
+      animation: fade-in 0.5s ease;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 0.6; transform: translateY(0); }
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      }
+      50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .side-panel {
+        display: none;
+      }
+    }
   </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between items-center text-white bg-black">
-
-  <!-- Header -->
-  <div class="w-full py-6 text-center border-b border-green-600/30">
-    <h1 class="text-4xl font-bold text-green-400 glow-text tracking-widest">
-      AI FACIAL RECOGNITION
-    </h1>
-  </div>
-
-  <!-- Video Stream -->
-  <div class="flex-1 w-full flex items-center justify-center">
-    <video id="videoFeed" autoplay playsinline muted class="w-full h-full object-cover bg-black"></video>
-  </div>
-
-  <!-- Controls - Countdown Timer -->
-  <div class="w-full py-8 flex flex-col items-center justify-center gap-6 border-t border-green-600/30">
-    <div class="timer-container text-center">
-      <div class="countdown text-green-400 glow-text" id="countdown">00:05</div>
-      <div class="text-sm text-green-400 mt-3 font-mono">Scanning Face...</div>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-black text-white overflow-auto"><!-- Tech Grid Background -->
+  <div class="tech-grid"></div>
+  <div class="relative z-10 min-h-full flex flex-col"><!-- Header -->
+   <header class="w-full px-6 py-6 flex justify-between items-center border-b border-green-500/20">
+    <div class="flex items-center gap-3">
+     <div class="hexagon flex items-center justify-center"><i class="fas fa-bolt text-black text-xl"></i>
+     </div>
+     <div>
+      <h1 class="text-2xl font-bold text-green-500 tracking-wider glow-text">AI FACIAL RECOGNITION</h1>
+      <p class="text-xs text-green-400/70 font-mono">v3.2.1 | Neural Face Auth</p>
+     </div>
     </div>
-    
-    <div id="resetMessage" class="hidden text-center">
-      <div class="text-lg text-green-400 font-mono mb-2">Scan Complete ✓</div>
-      <div class="countdown text-green-400 glow-text" id="resetCountdown">10</div>
-      <div class="text-sm text-green-400 mt-3 font-mono">Redirecting to Next Step...</div>
+    <div class="flex items-center gap-4">
+     <div class="px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-xs font-mono flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> CAMERA ACTIVE
+     </div>
     </div>
-  </div>
-
-  <!-- JS -->
+   </header><!-- Main Content Grid -->
+   <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6"><!-- Left Panel -->
+    <div class="hidden lg:block lg:col-span-3 space-y-4">
+     <div class="side-panel">
+      <div class="panel-title"><i class="fas fa-microchip"></i> AI PROCESSING
+      </div>
+      <div class="panel-content">
+       <div class="stat-row"><span>Face Detection:</span> <span class="stat-value" id="face-status">ACTIVE</span>
+       </div>
+       <div class="stat-row"><span>AI Confidence:</span> <span class="stat-value" id="confidence">0%</span>
+       </div>
+       <div class="stat-row"><span>Features Found:</span> <span class="stat-value" id="features">0/68</span>
+       </div>
+       <div class="stat-row"><span>Match Quality:</span> <span class="stat-value" id="quality">PENDING</span>
+       </div>
+      </div>
+     </div>
+     <div class="side-panel">
+      <div class="panel-title"><i class="fas fa-shield-halved"></i> SECURITY
+      </div>
+      <div class="panel-content">
+       <div class="stat-row"><span>✓ Liveness Check</span>
+       </div>
+       <div class="stat-row"><span>✓ 3D Face Mapping</span>
+       </div>
+       <div class="stat-row"><span>✓ Anti-Spoofing</span>
+       </div>
+      </div>
+     </div>
+     <div class="side-panel">
+      <div class="panel-title"><i class="fas fa-chart-line"></i> DATA STREAM
+      </div>
+      <div class="panel-content data-stream" id="data-stream">
+       <div class="data-line">
+        &gt; Initializing camera...
+       </div>
+       <div class="data-line">
+        &gt; Loading AI model...
+       </div>
+       <div class="data-line">
+        &gt; Face detection ready...
+       </div>
+      </div>
+     </div>
+    </div><!-- Center - Video Feed -->
+    <div class="lg:col-span-6 flex flex-col">
+     <div class="video-container flex-1 relative bg-black rounded-2xl overflow-hidden border-2 border-green-500/20"><!-- Scan Lines Overlay -->
+      <div class="scan-lines"></div><!-- Scanning Laser -->
+      <div class="scan-laser"></div><!-- Face Detection Box -->
+      <div class="face-detection-box">
+       <div class="corner corner-tl"></div>
+       <div class="corner corner-tr"></div>
+       <div class="corner corner-bl"></div>
+       <div class="corner corner-br"></div>
+      </div><!-- Video Element -->
+      <video id="videoFeed" autoplay playsinline muted class="w-full h-full object-cover"></video>
+     </div><!-- Timer Section -->
+     <div class="mt-6 flex justify-center">
+      <div class="timer-container text-center">
+       <div class="countdown text-green-400 glow-text" id="countdown">
+        00:05
+       </div>
+       <div class="text-sm text-green-400 mt-3 font-mono"><span class="status-indicator"></span> <span id="status-text">Scanning Face...</span>
+       </div>
+      </div>
+     </div>
+     <div id="resetMessage" class="hidden mt-6 flex justify-center">
+      <div class="timer-container text-center">
+       <div class="text-lg text-green-400 font-mono mb-2">
+        ✓ Scan Complete
+       </div>
+       <div class="countdown text-green-400 glow-text" id="resetCountdown">
+        10
+       </div>
+       <div class="text-sm text-green-400 mt-3 font-mono">
+        Redirecting to Next Step...
+       </div>
+      </div>
+     </div>
+    </div><!-- Right Panel -->
+    <div class="hidden lg:block lg:col-span-3 space-y-4">
+     <div class="side-panel">
+      <div class="panel-title"><i class="fas fa-brain"></i> FEATURE ANALYSIS
+      </div>
+      <div class="panel-content">
+       <div class="progress-item">
+        <div class="progress-label"><span>Eyes Detection</span> <span id="eyes-progress">0%</span>
+        </div>
+        <div class="progress-bar-container">
+         <div class="progress-bar-fill" id="eyes-bar"></div>
+        </div>
+       </div>
+       <div class="progress-item">
+        <div class="progress-label"><span>Nose &amp; Mouth</span> <span id="nose-progress">0%</span>
+        </div>
+        <div class="progress-bar-container">
+         <div class="progress-bar-fill" id="nose-bar"></div>
+        </div>
+       </div>
+       <div class="progress-item">
+        <div class="progress-label"><span>Jawline</span> <span id="jaw-progress">0%</span>
+        </div>
+        <div class="progress-bar-container">
+         <div class="progress-bar-fill" id="jaw-bar"></div>
+        </div>
+       </div>
+       <div class="progress-item">
+        <div class="progress-label"><span>Overall Match</span> <span id="overall-progress">0%</span>
+        </div>
+        <div class="progress-bar-container">
+         <div class="progress-bar-fill" id="overall-bar"></div>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="side-panel">
+      <div class="panel-title"><i class="fas fa-clock"></i> SCAN HISTORY
+      </div>
+      <div class="panel-content">
+       <div class="stat-row"><span>Camera Initialized</span> <span class="text-green-500/60 text-xs">Now</span>
+       </div>
+       <div class="stat-row"><span>Face Detected</span> <span class="text-green-500/60 text-xs">2s ago</span>
+       </div>
+       <div class="stat-row"><span>Analysis Started</span> <span class="text-green-500/60 text-xs">3s ago</span>
+       </div>
+      </div>
+     </div>
+     <div class="side-panel">
+      <div class="panel-title"><i class="fas fa-server"></i> SYSTEM INFO
+      </div>
+      <div class="panel-content">
+       <div class="stat-row"><span>CPU Usage:</span> <span class="stat-value">34%</span>
+       </div>
+       <div class="stat-row"><span>Memory:</span> <span class="stat-value">1.8 GB</span>
+       </div>
+       <div class="stat-row"><span>Frame Rate:</span> <span class="stat-value">30 FPS</span>
+       </div>
+       <div class="stat-row"><span>Latency:</span> <span class="stat-value">8ms</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- JS -->
   <script>
+    const streamMessages = [
+      '> Analyzing facial geometry...',
+      '> Detecting eye position...',
+      '> Mapping nose structure...',
+      '> Processing jawline data...',
+      '> Calculating symmetry...',
+      '> Extracting biometric points...',
+      '> Verifying liveness...',
+      '> Running anti-spoofing...',
+      '> Cross-referencing database...',
+      '> Validating facial signature...'
+    ];
+
+    let progressInterval;
+    let streamInterval;
+
+    function updateDataStream() {
+      const container = document.getElementById('data-stream');
+      if (!container) return;
+      
+      const line = document.createElement('div');
+      line.className = 'data-line';
+      line.textContent = streamMessages[Math.floor(Math.random() * streamMessages.length)];
+      container.insertBefore(line, container.firstChild);
+      
+      while (container.children.length > 6) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    function startProgressAnimation() {
+      let progress = 0;
+      progressInterval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress > 100) progress = 100;
+        
+        // Update progress bars
+        const eyesBar = document.getElementById('eyes-bar');
+        const noseBar = document.getElementById('nose-bar');
+        const jawBar = document.getElementById('jaw-bar');
+        const overallBar = document.getElementById('overall-bar');
+        
+        if (eyesBar) eyesBar.style.width = progress + '%';
+        if (noseBar) noseBar.style.width = (progress * 0.95) + '%';
+        if (jawBar) jawBar.style.width = (progress * 0.9) + '%';
+        if (overallBar) overallBar.style.width = (progress * 0.85) + '%';
+        
+        // Update text values
+        const eyesProgress = document.getElementById('eyes-progress');
+        const noseProgress = document.getElementById('nose-progress');
+        const jawProgress = document.getElementById('jaw-progress');
+        const overallProgress = document.getElementById('overall-progress');
+        const confidence = document.getElementById('confidence');
+        const features = document.getElementById('features');
+        
+        if (eyesProgress) eyesProgress.textContent = Math.floor(progress) + '%';
+        if (noseProgress) noseProgress.textContent = Math.floor(progress * 0.95) + '%';
+        if (jawProgress) jawProgress.textContent = Math.floor(progress * 0.9) + '%';
+        if (overallProgress) overallProgress.textContent = Math.floor(progress * 0.85) + '%';
+        if (confidence) confidence.textContent = Math.floor(progress) + '%';
+        if (features) features.textContent = Math.floor((progress / 100) * 68) + '/68';
+        
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+          const quality = document.getElementById('quality');
+          if (quality) quality.textContent = 'EXCELLENT';
+        }
+      }, 120);
+    }
+
     // Front Camera Stream
     async function startVideo() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" }, // front camera
+          video: { facingMode: "user" },
           audio: false
         });
         document.getElementById('videoFeed').srcObject = stream;
+        
+        // Start animations
+        startProgressAnimation();
+        streamInterval = setInterval(updateDataStream, 700);
+        
         startCountdown();
       } catch (err) {
         console.error("Camera error:", err.message);
-        alert("Camera not accessible: " + err.message);
+        const statusText = document.getElementById('status-text');
+        if (statusText) statusText.textContent = "Camera not accessible: " + err.message;
       }
     }
 
@@ -92,6 +589,8 @@
         
         if (seconds < 0) {
           clearInterval(timer);
+          clearInterval(progressInterval);
+          clearInterval(streamInterval);
           startResetCountdown();
         }
       }, 1000);
@@ -99,8 +598,11 @@
 
     // Reset countdown 10 seconds then redirect
     function startResetCountdown() {
-      document.getElementById('countdown').parentElement.classList.add('hidden');
-      document.getElementById('resetMessage').classList.remove('hidden');
+      const timerContainer = document.querySelector('.timer-container');
+      const resetMessage = document.getElementById('resetMessage');
+      
+      if (timerContainer) timerContainer.style.display = 'none';
+      if (resetMessage) resetMessage.classList.remove('hidden');
       
       let resetSeconds = 10;
       const resetCountdownEl = document.getElementById('resetCountdown');
@@ -118,6 +620,5 @@
 
     startVideo();
   </script>
-
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c751510218af01f',t:'MTc2OTk4NzAwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
